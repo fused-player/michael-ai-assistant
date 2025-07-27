@@ -8,7 +8,7 @@ type = sys.argv[1]
 contact = sys.argv[2]
 message = sys.argv[3:]
 message = ' '.join(message)
-host = os.environ("USER")
+host = os.environ.get("USER")
 
 if os.path.exists(f"/home/{host}/pywaykit/firefox_whatsapp_profile"):
 

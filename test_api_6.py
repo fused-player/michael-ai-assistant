@@ -24,9 +24,9 @@ with open("user_name.d","a+") as f:
 		user_data_list.append(host_name + "\n")
 		f.writelines(user_data_list)
 	else :
-		user = content[0]
-		sshpass = content[1]
-		host_name = content[2]
+		user = content[0].strip()
+		sshpass = content[1].strip()
+		host_name = content[2].strip()
 
 g_config.user_g = user
 g_config.sshpass_g = sshpass

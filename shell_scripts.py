@@ -99,26 +99,29 @@ def grabbers(splitted_prompt,splitted_response,grabbers):
 
 
 def messenger(splitted_response):
-    splitted_response1 = []
-    for index,word in enumerate(splitted_response):
-        if word == "contact:":
-            splitted_response1 = (splitted_response[index+1])
-            print(splitted_response1 + " Babu")
-        elif word == "whatsapp_msg:":
-            new_list = []
-            w_msg_cook = True
-            #splitted_response = ' '.join(splitted_response[index+1:])
-            while w_msg_cook:
-                new_list.append(splitted_response[index+1])
-                index += 1
-                if (splitted_response[index] == "contact:"):
-                    w_msg_cook = False
-            actual_msg = ' '.join(new_list[:len(new_list)-1])
-            actual_msg = shlex.quote(actual_msg)
-            print(actual_msg+"jhgjhgdkjg")
+    contact_number = None
+    message_tokens = []
+    capturing = False
 
-    if splitted_response and splitted_response1:
-        m_ssh(f"python3 /home/{g_config.host_name_g}/.michael/modules/m_messenger.py 'whatsapp' {splitted_response1} {actual_msg}")
+    for word in splitted_response:
+        if word == "whatsapp_msg:":
+            capturing = True
+            continue
+        elif word == "contact:":
+            capturing = False
+            continue
+
+        if capturing:
+            message_tokens.append(word)
+        elif word.startswith("+"):
+            contact_number = word
+
+    if contact_number and message_tokens:
+        message = ' '.join(message_tokens)
+        quoted_message = shlex.quote(message)
+        print(f"Contact: {contact_number}")
+        print(f"Message: {message}")
+        m_ssh(f"python3 /home/{g_config.host_name_g}/.michael/modules/m_messenger.py 'whatsapp' {contact_number} {quoted_message}")
 
 
 def user_dat():
