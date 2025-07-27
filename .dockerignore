@@ -1,0 +1,9 @@
+error.log
+install.sh
+output.log
+PyWhatkit_DB.txt
+to_do.txt
+working_dir/
+req_software/
+__pycache__/
+data/

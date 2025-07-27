@@ -1,0 +1,9 @@
+models/tts/
+models/vosk/
+req_software/
+data/c_dat.vcf
+data/contacts.txt
+PyWhatKit_DB.txt
+__pycache__/
+
+audio/clone/audio2.wav
