@@ -1,10 +1,16 @@
+import os
+import warnings
+warnings.filterwarnings("ignore")
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+
+import sys
 import subprocess 
 import torch
-import os
 from TTS.api import TTS
 import pygame
 import time
 import shlex
+import contextlib
 from pydub import AudioSegment
 import globals.global_config as g_config
 from modules.send_keys import m_ssh
@@ -25,6 +31,16 @@ shell_access = False
 # 			m_ssh(f'tmux send-keys -t michael "firefox" C-m')
 
 
+
+@contextlib.contextmanager
+def suppress_alsa_warnings():
+    with open(os.devnull, "w") as devnull:
+        old_stderr = os.dup(2)
+        os.dup2(devnull.fileno(), 2)
+        try:
+            yield
+        finally:
+            os.dup2(old_stderr, 2)
 
 def link_openings(splitted_prompt, splitted_response, openers, link_openers):
     case1 = False
@@ -49,6 +65,7 @@ def link_openings(splitted_prompt, splitted_response, openers, link_openers):
 
 
 def voice_output(splitted_response):
+	os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 	import pygame
 	pygame.init()
 	pygame.mixer.init()
@@ -61,11 +78,16 @@ def voice_output(splitted_response):
 			splitted_response = splitted_response[0:index]
 
 	response = ' '.join(splitted_response)
+	original_stdout = sys.stdout
+	sys.stdout = open(os.devnull, 'w')
 	device = "cuda" if torch.cuda.is_available() else "cpu"
 
 	tts = TTS(model_name="tts_models/multilingual/multi-dataset/your_tts", progress_bar=False).to(device)
 
 	tts.tts_to_file(response, speaker_wav="audio/clone/audio.wav", language = "en",file_path="audio/m_temp/output.wav",stability = 1)
+
+
+
 	# Load audio file (Conqui output)
 	audio = AudioSegment.from_file("audio/m_temp/output.wav")
 
@@ -74,11 +96,14 @@ def voice_output(splitted_response):
 
 	# Save or play the new audio
 	bass_audio.export("audio/m_temp/output_bass.wav", format="wav")
+	with suppress_alsa_warnings():
+		pygame.mixer.music.load("audio/m_temp/output_bass.wav")
+		pygame.mixer.music.play()
+		while pygame.mixer.music.get_busy():
+			pygame.time.Clock().tick(10)
 
-	pygame.mixer.music.load("audio/m_temp/output_bass.wav")
-	pygame.mixer.music.play()
-	while pygame.mixer.music.get_busy():
-		pygame.time.Clock().tick(10)
+	sys.stdout.close()
+	sys.stdout = original_stdout
 
 def grabbers(splitted_prompt,splitted_response,grabbers):
 	case1 = False
