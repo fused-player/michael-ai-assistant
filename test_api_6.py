@@ -4,10 +4,23 @@ import shutil
 import google.generativeai as genai
 import shell_scripts
 import subprocess
+from rich.console import Console
+from rich.panel import Panel
 from modules.send_keys import m_ssh
 import globals.global_config as g_config
 
+ART = r"""
+███╗   ███╗██╗ ██████╗██╗  ██╗ █████╗ ███████╗██╗     
+████╗ ████║██║██╔════╝██║  ██║██╔══██╗██╔════╝██║     
+██╔████╔██║██║██║     ███████║███████║█████╗  ██║     
+██║╚██╔╝██║██║██║     ██╔══██║██╔══██║██╔══╝  ██║     
+██║ ╚═╝ ██║██║╚██████╗██║  ██║██║  ██║███████╗███████╗
+╚═╝     ╚═╝╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
+                                                 dev: fusedplayer
+"""
 
+console = Console()
+panel = Panel(ART,title="Michael AI",border_style="bold blue")
 
 #---user-name-grabbing---#
 user_data_list = []
@@ -16,9 +29,11 @@ with open("user_name.d","a+") as f:
 	content = f.readlines()
 	if len(content) < 3:
 		f.truncate(0)
-		user = input("Enter Your Name : ")
-		sshpass = input("Enter Your Host SSH Pass : ")
-		host_name = input("Enter HOST Machine Name : ")
+		panel_details = Panel("[bold]Please Enter the Req Data.[/]",title="[bold]User Authentication[/]")
+		console.print(panel_details)
+		user = console.input("[bold cyan]Enter Your Name > [/]")
+		sshpass = console.input("[bold cyan]Enter Your Host SSH Pass > [/]")
+		host_name = console.input("[bold cyan]Enter HOST Machine Name > [/]")
 		user_data_list.append(user + "\n")
 		user_data_list.append(sshpass + "\n")
 		user_data_list.append(host_name + "\n")
@@ -31,6 +46,9 @@ with open("user_name.d","a+") as f:
 g_config.user_g = user
 g_config.sshpass_g = sshpass
 g_config.host_name_g = host_name
+
+console.print(f"[bold cyan]User : {g_config.user_g}[/]")
+
 #---Get APIs---#
 api_list = []
 with open("./shared/api.d","a+") as f:
@@ -38,9 +56,11 @@ with open("./shared/api.d","a+") as f:
 	content = f.readlines()
 	if len(content) < 4:
 		f.truncate(0)
-		genai_api = input("Enter Your Gen AI API : ")
-		g_image = input("Enter Google Image API : ")
-		cx_key = input("Enter CX Key : ")
+		panel_details2 = Panel("[bold]Enter Your Api Keys.[/]",title="[bold]API Keys[/]")
+		console.print(panel_details2)
+		genai_api = console.input("[bold cyan]Enter Your Gen AI API > [/]")
+		g_image = console.input("[bold cyan]Enter Google Image API > [/]")
+		cx_key = console.input("[bold cyan]Enter CX Key > [/]")
 		api_list.append(genai_api + "\n")
 		api_list.append(g_image + "\n")
 		api_list.append(cx_key + "\n")
@@ -86,8 +106,7 @@ sys_dat = {
 
 user = ""
 
-print("sys_dat : ")
-print(sys_dat)
+console.print(f"[bold yellow]\nCurrent Date : {t_date.stdout}[/]")
 
 
 #---brain-init---#
@@ -230,7 +249,7 @@ chat_session = model.start_chat(
 )
 while running:
 	if not shell_scripts.shell_access and not shell_scripts.op_check:
-		prompt = input("\nYou : ")
+		prompt = console.input("[cyan]\nYou > [/]")
 	else :
 		prompt = f"check and rectify {shell_out}"
 	if shell_scripts.op_check:
@@ -264,6 +283,10 @@ while running:
 		brain.write(f"{g_config.user_g} : {prompt}\n")
 		brain.write(f"Michael : {res}\n")
 		
+	if not shell_scripts.shell_access and not shell_scripts.op_check:
+		console.print("[bold magenta]Michael > [/]"+ response.text)
+
+
 	#---calling-modular-functions---#
 
 	shell_scripts.voice_output(splitted_response)
@@ -276,11 +299,7 @@ while running:
 
 	shell_out = shell_scripts.s_a(splitted_response)
 	
-	print(f"\nShell OUT : {shell_out}")
+	console.print(f"[bold green]\nShell Output : {shell_out}[/]")
 	shell_scripts.user_dat()
-	
-	print(splitted_response)
-	
-	print(f"\nOPCHECK ::: {shell_scripts.op_check}")
-	if not shell_scripts.shell_access and not shell_scripts.op_check:
-		print("\nMichael : "+ response.text)
+
+
