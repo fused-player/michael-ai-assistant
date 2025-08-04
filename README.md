@@ -30,12 +30,8 @@ docker pull fusedplayer49/michael_ai:latest
 ## 2. Create the Docker Container
 
 ```bash
-docker create \
-  --name michael \
-  -v /home/$USER/.michael:/usr/local/app/shared \
-  --privileged=true \
-  --device=/dev/snd:/dev/snd \
-  -it fusedplayer49/michael_ai:latest
+docker create --name michael   -v /home/$USER/.michael:/usr/local/app/shared   --privileged=true   -e XDG_RUNTIME_DIR=/tmp/xdg  --device=/dev/snd:/dev/snd   -it fusedplayer49/michael_ai:latest
+
 ```
 
 Note: The `.michael` directory will be automatically created later by the installer if not present.
